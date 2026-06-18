@@ -1,95 +1,154 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import "./App.css";
 
 function App() {
-  const [assignments, setAssignments] = useState([]);
-  const [title, setTitle] = useState("");
-  const [subject, setSubject] = useState("");
-  const [status, setStatus] = useState("Pending");
+  const [transactions, setTransactions] = useState([]);
+  const [type, setType] = useState("Expense");
+  const [category, setCategory] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState("");
 
-  const addAssignment = () => {
-    if (!title || !subject) return;
+  const addTransaction = () => {
+    if (!category || !amount || !date) {
+      alert("Please fill all fields");
+      return;
+    }
 
-    setAssignments([
-      ...assignments,
-      {
-        id: Date.now(),
-        title,
-        subject,
-        status,
-      },
-    ]);
+    const newTransaction = {
+      id: Date.now(),
+      type,
+      category,
+      amount: parseFloat(amount),
+      date,
+    };
 
-    setTitle("");
-    setSubject("");
-    setStatus("Pending");
+    setTransactions([...transactions, newTransaction]);
+
+    setCategory("");
+    setAmount("");
+    setDate("");
   };
+
+  const deleteTransaction = (id) => {
+    setTransactions(
+      transactions.filter((item) => item.id !== id)
+    );
+  };
+
+  const totalIncome = transactions
+    .filter((item) => item.type === "Income")
+    .reduce((sum, item) => sum + item.amount, 0);
+
+  const totalExpense = transactions
+    .filter((item) => item.type === "Expense")
+    .reduce((sum, item) => sum + item.amount, 0);
+
+  const balance = totalIncome - totalExpense;
 
   return (
     <div className="container">
-      <h1>Assignment Tracker</h1>
-
-      <div className="form">
-        <input
-          type="text"
-          placeholder="Assignment Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-
-        <input
-          type="text"
-          placeholder="Subject"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-        />
-
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-        >
-          <option>Pending</option>
-          <option>Submitted</option>
-          <option>Late</option>
-        </select>
-
-        <button onClick={addAssignment}>Add Assignment</button>
-      </div>
+      <h1>Daily Expense Analytics Dashboard</h1>
 
       <div className="summary">
-        <h3>Total: {assignments.length}</h3>
-        <h3>
-          Submitted:{" "}
-          {assignments.filter((a) => a.status === "Submitted").length}
-        </h3>
-        <h3>
-          Pending:{" "}
-          {assignments.filter((a) => a.status === "Pending").length}
-        </h3>
-        <h3>
-          Late: {assignments.filter((a) => a.status === "Late").length}
-        </h3>
+        <div className="card">
+          <h3>Total Income</h3>
+          <p>₹{totalIncome}</p>
+        </div>
+
+        <div className="card">
+          <h3>Total Expense</h3>
+          <p>₹{totalExpense}</p>
+        </div>
+
+        <div className="card">
+          <h3>Balance</h3>
+          <p>₹{balance}</p>
+        </div>
       </div>
+
+      <div className="form">
+        <select
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+        >
+          <option>Income</option>
+          <option>Expense</option>
+        </select>
+
+        <input
+          type="text"
+          placeholder="Category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        />
+
+        <input
+          type="number"
+          placeholder="Amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+        />
+
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+
+        <button onClick={addTransaction}>
+          Add Transaction
+        </button>
+      </div>
+
+      <h2>Transaction History</h2>
 
       <table>
         <thead>
           <tr>
-            <th>Title</th>
-            <th>Subject</th>
-            <th>Status</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Action</th>
           </tr>
         </thead>
 
         <tbody>
-          {assignments.map((item) => (
+          {transactions.map((item) => (
             <tr key={item.id}>
-              <td>{item.title}</td>
-              <td>{item.subject}</td>
-              <td>{item.status}</td>
+              <td>{item.type}</td>
+              <td>{item.category}</td>
+              <td>₹{item.amount}</td>
+              <td>{item.date}</td>
+              <td>
+                <button
+                  onClick={() =>
+                    deleteTransaction(item.id)
+                  }
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      <h2>Category Analytics</h2>
+
+      {[...new Set(transactions.map((t) => t.category))].map(
+        (cat) => {
+          const total = transactions
+            .filter((t) => t.category === cat)
+            .reduce((sum, t) => sum + t.amount, 0);
+
+          return (
+            <div className="analytics" key={cat}>
+              {cat}: ₹{total}
+            </div>
+          );
+        }
+      )}
     </div>
   );
 }
