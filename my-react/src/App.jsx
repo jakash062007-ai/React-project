@@ -1,96 +1,95 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./App.css";
 
 function App() {
-  const [transactions, setTransactions] = useState([]);
-  const [desc, setDesc] = useState("");
-  const [amount, setAmount] = useState("");
-  const [type, setType] = useState("income");
-  const [category, setCategory] = useState("Food");
+  const [assignments, setAssignments] = useState([]);
+  const [title, setTitle] = useState("");
+  const [subject, setSubject] = useState("");
+  const [status, setStatus] = useState("Pending");
 
-  const addTransaction = () => {
-    if (!desc || !amount) {
-      alert("Please enter all fields");
-      return;
-    }
+  const addAssignment = () => {
+    if (!title || !subject) return;
 
-    const newTransaction = {
-      id: Date.now(),
-      desc,
-      amount: Number(amount),
-      type,
-      category,
-    };
+    setAssignments([
+      ...assignments,
+      {
+        id: Date.now(),
+        title,
+        subject,
+        status,
+      },
+    ]);
 
-    setTransactions([...transactions, newTransaction]);
-
-    setDesc("");
-    setAmount("");
+    setTitle("");
+    setSubject("");
+    setStatus("Pending");
   };
-
-  const totalIncome = transactions
-    .filter((item) => item.type === "income")
-    .reduce((sum, item) => sum + item.amount, 0);
-
-  const totalExpense = transactions
-    .filter((item) => item.type === "expense")
-    .reduce((sum, item) => sum + item.amount, 0);
-
-  const balance = totalIncome - totalExpense;
 
   return (
     <div className="container">
-      <h1>Daily Expense Dashboard</h1>
+      <h1>Assignment Tracker</h1>
 
       <div className="form">
         <input
           type="text"
-          placeholder="Description"
-          value={desc}
-          onChange={(e) => setDesc(e.target.value)}
+          placeholder="Assignment Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
 
         <input
-          type="number"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          type="text"
+          placeholder="Subject"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
         />
 
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="income">Income</option>
-          <option value="expense">Expense</option>
-        </select>
-
         <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
         >
-          <option>Food</option>
-          <option>Travel</option>
-          <option>Shopping</option>
-          <option>Salary</option>
-          <option>Other</option>
+          <option>Pending</option>
+          <option>Submitted</option>
+          <option>Late</option>
         </select>
 
-        <button onClick={addTransaction}>Add Transaction</button>
+        <button onClick={addAssignment}>Add Assignment</button>
       </div>
 
       <div className="summary">
-        <h3>Total Income: ₹{totalIncome}</h3>
-        <h3>Total Expense: ₹{totalExpense}</h3>
-        <h3>Balance: ₹{balance}</h3>
+        <h3>Total: {assignments.length}</h3>
+        <h3>
+          Submitted:{" "}
+          {assignments.filter((a) => a.status === "Submitted").length}
+        </h3>
+        <h3>
+          Pending:{" "}
+          {assignments.filter((a) => a.status === "Pending").length}
+        </h3>
+        <h3>
+          Late: {assignments.filter((a) => a.status === "Late").length}
+        </h3>
       </div>
 
-      <h2>Transaction History</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Subject</th>
+            <th>Status</th>
+          </tr>
+        </thead>
 
-      <ul>
-        {transactions.map((item) => (
-          <li key={item.id}>
-            {item.desc} - ₹{item.amount} | {item.category} | {item.type}
-          </li>
-        ))}
-      </ul>
+        <tbody>
+          {assignments.map((item) => (
+            <tr key={item.id}>
+              <td>{item.title}</td>
+              <td>{item.subject}</td>
+              <td>{item.status}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
